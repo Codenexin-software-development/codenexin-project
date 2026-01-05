@@ -1,0 +1,109 @@
+.carousel-section {
+  background: #f5f7fa;
+  padding: 80px 20px;
+}
+
+.carousel-container {
+  max-width: 1200px;
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-slide {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.carousel-slide.active {
+  display: flex;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.carousel-content {
+  flex: 1;
+}
+
+.carousel-content h2 {
+  font-size: 32px;
+  color: #0b3c5d;
+  margin-bottom: 15px;
+}
+
+.carousel-content p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 25px;
+  max-width: 480px;
+}
+
+.carousel-btn {
+  background: #f39c12;
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.carousel-btn i {
+  margin-left: 6px;
+}
+
+.carousel-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.carousel-image img {
+  width: 260px;
+  max-width: 100%;
+}
+
+/* Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: #ccc;
+  border-radius: 50%;
+  margin: 0 6px;
+  cursor: pointer;
+}
+
+.dot.active {
+  background: #0b3c5d;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .carousel-slide.active {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .carousel-content p {
+    margin: auto;
+  }
+}
