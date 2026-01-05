@@ -1,146 +1,243 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import logo from "../logo.jpg";
-import "./LoginPage.css";
-
-function LoginPage() {
-  const navigate = useNavigate();
-
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [showOTPModal, setShowOTPModal] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-
-  // ===== SEND OTP =====
-  const handleMobileSubmit = (e) => {
-    e.preventDefault();
-
-    if (!/^\d{10}$/.test(mobileNumber)) {
-      alert("Please enter a valid 10-digit mobile number");
-      return;
-    }
-
-    setShowOTPModal(true);
-  };
-
-  // ===== VERIFY OTP =====
-  const handleOTPSubmit = (e) => {
-    e.preventDefault();
-    const enteredOTP = otp.join("");
-
-    if (enteredOTP.length !== 6) {
-      alert("Invalid OTP");
-      return;
-    }
-
-    navigate("/home");
-  };
-
-  const handleOtpChange = (index, value) => {
-    if (/^\d?$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-
-      if (value && index < 5) {
-        document.getElementById(`otp-${index + 1}`).focus();
-      }
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`).focus();
-    }
-  };
-
-  return (
-    <>
-      {/* ===== HEADER ===== */}
-      <header className="party-header">
-  <div className="header-top">
-    <h1>Nyay Paksh Party</h1>
-    <p>A party by the people, chosen by the people</p>
-  </div>
-</header>
-
-
-
-      {/* ===== LOGIN CONTENT ===== */}
-      <div className="page-wrapper">
-        <div className="login-card">
-          <img src={logo} alt="Logo" className="top-logo" />
-
-          <h2 className="main-title">Join the Nyaya Party Family</h2>
-
-          <div className="info-box">
-            <h4>OTP Verification</h4>
-            <p>
-              Enter your mobile number to receive an OTP
-              <br />
-              This secure process ensures official membership.
-            </p>
-          </div>
-
-          <form onSubmit={handleMobileSubmit}>
-            <label>Enter your mobile number *</label>
-
-            <div className="phone-input-wrapper">
-              <span className="country-code">+91</span>
-              <input
-                type="tel"
-                placeholder="Mobile number (10 digits)"
-                value={mobileNumber}
-                maxLength="10"
-                inputMode="numeric"
-                onChange={(e) =>
-                  setMobileNumber(
-                    e.target.value.replace(/\D/g, "").slice(0, 10)
-                  )
-                }
-                required
-              />
-            </div>
-
-            <button type="submit" className="otp-btn">
-              Send OTP
-            </button>
-          </form>
-        </div>
-
-        {/* ===== OTP MODAL ===== */}
-        {showOTPModal && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h3>OTP Verification</h3>
-              <p>Enter the OTP sent to +91 {mobileNumber}</p>
-
-              <form onSubmit={handleOTPSubmit}>
-                <div className="otp-inputs">
-                  {otp.map((digit, index) => (
-                    <input
-                      key={index}
-                      id={`otp-${index}`}
-                      type="text"
-                      maxLength="1"
-                      value={digit}
-                      onChange={(e) =>
-                        handleOtpChange(index, e.target.value)
-                      }
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    />
-                  ))}
-                </div>
-
-                <button type="submit" className="otp-btn">
-                  Verify & Continue
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
+/* =========================
+   COLOR TOKENS
+========================= */
+:root {
+  --primary-blue: #0f3b5f;
+  --secondary-blue: #123a55;
+  --primary-orange: #e08a2e;
+  --light-accent: #f2a65a;
+  --white: #ffffff;
+  --light-bg: #f7f9fc;
 }
 
-export default LoginPage;
+/* =========================
+   GLOBAL
+========================= */
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--light-bg);
+}
+
+/* =========================
+   HEADER
+========================= */
+.party-header {
+  background: var(--primary-orange);
+  text-align: center;
+  padding: 22px 16px;
+  color: var(--white);
+}
+
+
+.header-top h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.header-top p {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+/* =========================
+   PAGE WRAPPER
+========================= */
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 12px;
+
+  background: linear-gradient(
+      rgba(15, 59, 95, 0.7), rgba(15, 59, 95, 0.7)
+    ),
+    url("https://www.thestatesman.com/wp-content/uploads/2025/04/IMG_0923-jpeg.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+/* =========================
+   LOGIN CARD
+========================= */
+.login-card {
+  background: var(--white);
+  width: 100%;
+  max-width: 380px;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.top-logo {
+  width: 70px;
+  display: block;
+  margin: 0 auto 12px;
+}
+
+.main-title {
+  text-align: center;
+  font-size: 18px;
+  color: var(--primary-blue);
+  margin-bottom: 14px;
+}
+
+/* =========================
+   INFO BOX
+========================= */
+.info-box {
+  background: #fff7ef;
+  border: 1px solid var(--light-accent);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.info-box h4 {
+  margin: 0;
+  color: var(--primary-orange);
+  font-size: 14px;
+}
+
+.info-box p {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #444;
+}
+
+/* =========================
+   FORM
+========================= */
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-blue);
+}
+
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+
+.country-code {
+  background: #f2f4f8;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.phone-input-wrapper input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* =========================
+   CONSENT TEXT
+========================= */
+.consent-text {
+  display: flex;
+  align-items: flex-start;
+  font-size: 11px;
+  color: #555;
+  margin: 10px 0 14px;
+  gap: 6px;
+}
+
+.consent-text input {
+  margin-top: 3px;
+}
+
+/* =========================
+   BUTTON
+========================= */
+.otp-btn {
+  width: 100%;
+  background: var(--primary-orange);
+  color: var(--white);
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.otp-btn:hover {
+  background: var(--light-accent);
+}
+
+/* =========================
+   OTP MODAL
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: var(--white);
+  width: 90%;
+  max-width: 350px;
+  padding: 20px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: space-between;
+  margin: 14px 0;
+}
+
+.otp-inputs input {
+  width: 42px;
+  height: 42px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+.login-footer {
+  background: var(--secondary-blue);
+  color: var(--white);
+  padding: 18px 10px;
+  font-size: 12px;
+}
+
+.footer-simple {
+  max-width: 380px;
+  margin: auto;
+  text-align: center;
+}
+
+.footer-contact-simple p {
+  margin: 4px 0;
+}
+
+.footer-links-simple a {
+  color: var(--light-accent);
+  text-decoration: none;
+}
