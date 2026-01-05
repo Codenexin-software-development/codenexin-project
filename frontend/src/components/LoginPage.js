@@ -5,254 +5,172 @@ import "./LoginPage.css";
 
 function LoginPage() {
   const navigate = useNavigate();
+
   const [mobileNumber, setMobileNumber] = useState("");
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
-  /* ================= SEND OTP ================= */
-  const handleMobileSubmit = async (e) => {
+  // ===== SEND OTP =====
+  const handleMobileSubmit = (e) => {
     e.preventDefault();
 
-    if (mobileNumber.length !== 10) {
+    if (!/^\d{10}$/.test(mobileNumber)) {
       alert("Please enter a valid 10-digit mobile number");
       return;
     }
 
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/api/otp/send`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: mobileNumber
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setShowOTPModal(true);
-      } else {
-        alert(data.message || "Failed to send OTP");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Server error while sending OTP");
-    }
+    setShowOTPModal(true);
   };
 
-  /* ================= VERIFY OTP ================= */
-  const handleOTPSubmit = async (e) => {
+  // ===== VERIFY OTP =====
+  const handleOTPSubmit = (e) => {
     e.preventDefault();
-
     const enteredOTP = otp.join("");
 
     if (enteredOTP.length !== 6) {
-      alert("Please enter a valid 6-digit OTP");
+      alert("Invalid OTP");
       return;
     }
 
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/api/otp/verify`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: mobileNumber,
-            otp: enteredOTP,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate("/home");
-      } else {
-        alert(data.message || "Invalid OTP");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Server error while verifying OTP");
-    }
+    navigate("/home");
   };
 
-  /* ================= OTP INPUT HANDLING ================= */
   const handleOtpChange = (index, value) => {
-    if (value.length <= 1 && /^\d*$/.test(value)) {
+    if (/^\d?$/.test(value)) {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
 
       if (value && index < 5) {
-        const nextInput = document.getElementById(`otp-${index + 1}`);
-        if (nextInput) nextInput.focus();
+        document.getElementById(`otp-${index + 1}`).focus();
       }
     }
   };
 
   const handleOtpKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      if (prevInput) prevInput.focus();
+      document.getElementById(`otp-${index - 1}`).focus();
     }
   };
 
-  /* ================= UI (UNCHANGED) ================= */
   return (
-    <div className="login-page">
-      <header className="login-header">
-        <div className="login-nav">
-          <div className="login-logo">
-            <img src={logo} alt="Nyay Paksh Logo" className="logo-image" />
-            <div className="logo-text-large">
-              <h1>Nyay Paksh</h1>
-              <p>For a Just and Equal India</p>
-            </div>
-          </div>
-
-          <button className="donate-btn-nav">
-            <i className="fas fa-heart"></i> Make a Donation
-          </button>
+    <>
+      {/* ===== HEADER ===== */}
+      <header className="party-header">
+        <div className="header-top">
+          <h1>Nyay Paksh Party</h1>
+          <p>A party by the people, chosen by the people</p>
         </div>
       </header>
 
-      <main className="login-content">
-        <div className="login-container-center">
-          <div className="center-logo-nyaypaksh">
-            <div className="logo-border">
-              <div className="logo-circle">
-                <img
-                  src={logo}
-                  alt="Nyay Paksh Logo"
-                  className="center-logo-image"
-                />
-              </div>
-            </div>
+      {/* ===== LOGIN CONTENT ===== */}
+      <div className="page-wrapper">
+        <div className="login-card">
+          <img src={logo} alt="Logo" className="top-logo" />
+
+          <h2 className="main-title">Join the Nyay Paksh Party Family</h2>
+
+          <div className="info-box">
+            <h4>OTP Verification</h4>
+            <p>
+              Register your mobile number and receive an OTP.
+              <br />
+              This helps verify your identity and ensures official membership.
+            </p>
           </div>
 
-          <br />
+          <form onSubmit={handleMobileSubmit}>
+            <label>Enter your mobile number *</label>
 
-          <div className="login-card-nyaypaksh">
-            <div className="login-card-header-nyaypaksh">
-              <h2>Give a missed call on</h2>
-              <div className="missed-call-number-nyaypaksh">
-                <span>88 00 00 2024</span>
-              </div>
-              <p className="missed-call-text-nyaypaksh">
-                and become a part of the Nyay Paksh
-              </p>
+            <div className="phone-input-wrapper">
+              <span className="country-code">+91</span>
+              <input
+                type="tel"
+                placeholder="Mobile number (10 digits)"
+                value={mobileNumber}
+                maxLength="10"
+                inputMode="numeric"
+                onChange={(e) =>
+                  setMobileNumber(
+                    e.target.value.replace(/\D/g, "").slice(0, 10)
+                  )
+                }
+                required
+              />
             </div>
 
-            <div className="login-divider-nyaypaksh">
-              <span>OR</span>
+            {/* INFO BELOW NUMBER */}
+            <div className="consent-text">
+              <input type="checkbox" required />{" "}
+              <span>
+                I agree to receive OTP, updates, and official communication from
+                the Nyay Paksh Party via SMS, WhatsApp, or calls.
+              </span>
             </div>
 
-            <div className="login-form-container">
-              <h3>Enter Your Mobile Number *</h3>
-              <form onSubmit={handleMobileSubmit} className="login-form-simple">
-                <div className="mobile-input-large-nyaypaksh">
-                  <div className="country-code-large-nyaypaksh">+91</div>
-                  <input
-                    type="tel"
-                    placeholder="98765 43210"
-                    value={mobileNumber}
-                    onChange={(e) =>
-                      setMobileNumber(e.target.value.replace(/\D/g, ""))
-                    }
-                    maxLength="10"
-                    required
-                    autoFocus
-                  />
+            <button type="submit" className="otp-btn">
+              Send OTP
+            </button>
+          </form>
+          <p style={{ fontSize: "12px", color: "#555", textAlign: "center", marginTop: "10px" }}>
+           Facing any issues? Contact our support center
+         </p>
+
+        </div>
+
+        {/* ===== OTP MODAL ===== */}
+        {showOTPModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>OTP Verification</h3>
+              <p>Enter the OTP sent to +91 {mobileNumber}</p>
+
+              <form onSubmit={handleOTPSubmit}>
+                <div className="otp-inputs">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      type="text"
+                      maxLength="1"
+                      value={digit}
+                      onChange={(e) =>
+                        handleOtpChange(index, e.target.value)
+                      }
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    />
+                  ))}
                 </div>
 
-                <button type="submit" className="send-otp-btn-nyaypaksh">
-                  Send OTP
+                <button type="submit" className="otp-btn">
+                  Verify & Continue
                 </button>
               </form>
-
-              <div className="terms-check-nyaypaksh">
-                <input type="checkbox" id="terms-check" required />
-                <label htmlFor="terms-check">
-                  I certify that the above provided information is correct and
-                  there is no misinformation
-                </label>
-              </div>
             </div>
           </div>
-        </div>
-      </main>
+        )}
+      </div>
 
+      {/* ===== FOOTER ===== */}
       <footer className="login-footer">
         <div className="footer-simple">
           <div className="footer-contact-simple">
-            <p><i className="fas fa-envelope"></i> contact@nyaipaksh.org</p>
-            <p><i className="fas fa-phone"></i> +91 11 1234 5678</p>
-            <p><i className="fas fa-map-marker-alt"></i> New Delhi, India</p>
+            <p> contact@nyaipaksh.org</p>
+            <p>📞 +91 11 1234 5678</p>
+            <p>📍 New Delhi, India</p>
           </div>
+
           <div className="footer-copyright">
-            <p>&copy; 2026 Nyay Paksh Party. All Rights Reserved.</p>
+            <p>© 2026 Nyay Paksh Party. All Rights Reserved.</p>
+            <div className="footer-links-simple">
+              <a href="#">Privacy Policy</a>
+              <span> | </span>
+              <a href="#">Terms of Service</a>
+            </div>
           </div>
         </div>
       </footer>
-
-      {showOTPModal && (
-        <div className="modal-overlay">
-          <div className="modal-content otp-modal">
-            <button
-              className="modal-close"
-              onClick={() => {
-                setShowOTPModal(false);
-                setOtp(["", "", "", "", "", ""]);
-              }}
-            >
-              &times;
-            </button>
-
-            <div className="modal-header">
-              <div className="modal-logo">
-                <img src={logo} alt="Nyay Paksh Logo" className="modal-logo-image" />
-                <h3>Nyay Paksh</h3>
-              </div>
-              <h2>Verify Your Number</h2>
-              <p>
-                Enter the 6-digit OTP sent to{" "}
-                <strong>+91 {mobileNumber}</strong>
-              </p>
-            </div>
-
-            <form onSubmit={handleOTPSubmit}>
-              <div className="otp-inputs-large">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`otp-${index}`}
-                    type="text"
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    maxLength="1"
-                    className="otp-digit-large"
-                    autoFocus={index === 0}
-                  />
-                ))}
-              </div>
-
-              <button type="submit" className="verify-btn-large">
-                <i className="fas fa-check-circle"></i> Verify & Continue
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 
