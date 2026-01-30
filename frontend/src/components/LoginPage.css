@@ -1,243 +1,370 @@
 /* =========================
-   COLOR TOKENS
+   ENHANCED LOGIN PAGE CSS
+   (Font Size Corrected)
+========================= */
+
+/* =========================
+   CSS VARIABLES
 ========================= */
 :root {
   --primary-blue: #0f3b5f;
   --secondary-blue: #123a55;
+  --accent-blue: #1e7bb6;
   --primary-orange: #e08a2e;
-  --light-accent: #f2a65a;
+  --light-orange: #f2a65a;
+  --dark-orange: #c5761e;
   --white: #ffffff;
   --light-bg: #f7f9fc;
+  --gray-light: #e9ecef;
+  --gray-medium: #6c757d;
+  --gray-dark: #343a40;
+  --success: #28a745;
+  --danger: #dc3545;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+
+  --gradient-primary: linear-gradient(135deg, #0f3b5f 0%, #1e7bb6 100%);
+  --gradient-orange: linear-gradient(135deg, #e08a2e 0%, #f2a65a 100%);
 }
 
 /* =========================
-   GLOBAL
+   GLOBAL RESET
 ========================= */
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   background: var(--light-bg);
+  color: var(--gray-dark);
 }
 
 /* =========================
    HEADER
 ========================= */
 .party-header {
-  background: var(--primary-orange);
-  text-align: center;
-  padding: 22px 16px;
+  background: var(--gradient-primary);
   color: var(--white);
+  padding: 0.8rem 1rem;
+  box-shadow: var(--shadow-md);
 }
 
+.header-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 
-.header-top h1 {
-  margin: 0;
-  font-size: 26px;
+.header-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.header-title h1 {
+  font-size: 1.6rem;
   font-weight: 700;
 }
 
-.header-top p {
-  margin-top: 6px;
-  font-size: 14px;
-  opacity: 0.95;
+.header-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.header-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-item {
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
 }
 
 /* =========================
    PAGE WRAPPER
 ========================= */
 .page-wrapper {
+  min-height: calc(100vh - 160px);
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 24px 12px;
-
-  background: linear-gradient(
-      rgba(15, 59, 95, 0.7), rgba(15, 59, 95, 0.7)
-    ),
-    url("https://www.thestatesman.com/wp-content/uploads/2025/04/IMG_0923-jpeg.webp");
+  padding: 2rem 1rem;
   background-size: cover;
   background-position: center;
+}
+
+/* =========================
+   PROGRESS INDICATOR
+========================= */
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.progress-step {
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.5;
+}
+
+.progress-step.active {
+  opacity: 1;
+}
+
+.step-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--primary-blue);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+.progress-step.active .step-circle {
+  background: var(--primary-orange);
+  color: #fff;
+}
+
+.progress-line {
+  width: 60px;
+  height: 2px;
+  background: #fff;
+  opacity: 0.4;
 }
 
 /* =========================
    LOGIN CARD
 ========================= */
 .login-card {
-  background: var(--white);
+  background: #fff;
   width: 100%;
-  max-width: 380px;
-  padding: 22px;
-  border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  max-width: 620px;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
 }
 
-.top-logo {
-  width: 70px;
-  display: block;
-  margin: 0 auto 12px;
+.card-header {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .main-title {
-  text-align: center;
-  font-size: 18px;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: var(--primary-blue);
-  margin-bottom: 14px;
+}
+
+.card-subtitle {
+  font-size: 0.95rem;
+  color: var(--gray-medium);
 }
 
 /* =========================
-   INFO BOX
+   ERROR / SUCCESS
 ========================= */
-.info-box {
-  background: #fff7ef;
-  border: 1px solid var(--light-accent);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 18px;
-  text-align: center;
+.error-message {
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background: var(--danger);
+  color: #fff;
 }
 
-.info-box h4 {
-  margin: 0;
-  color: var(--primary-orange);
-  font-size: 14px;
-}
-
-.info-box p {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #444;
+.error-message.success {
+  background: var(--success);
 }
 
 /* =========================
    FORM
 ========================= */
-label {
-  font-size: 13px;
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.input-label {
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--secondary-blue);
+  color: var(--primary-blue);
+  margin-bottom: 0.4rem;
 }
 
 .phone-input-wrapper {
   display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  margin: 8px 0;
+  border: 2px solid var(--gray-light);
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .country-code {
-  background: #f2f4f8;
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #555;
+  padding: 0.8rem 1rem;
+  background: var(--gradient-primary);
+  color: #fff;
+  font-size: 0.95rem;
 }
 
 .phone-input-wrapper input {
   border: none;
-  outline: none;
-  flex: 1;
-  padding: 10px;
-  font-size: 14px;
-}
-
-/* =========================
-   CONSENT TEXT
-========================= */
-.consent-text {
-  display: flex;
-  align-items: flex-start;
-  font-size: 11px;
-  color: #555;
-  margin: 10px 0 14px;
-  gap: 6px;
-}
-
-.consent-text input {
-  margin-top: 3px;
-}
-
-/* =========================
-   BUTTON
-========================= */
-.otp-btn {
+  padding: 0.8rem;
+  font-size: 1rem;
   width: 100%;
-  background: var(--primary-orange);
-  color: var(--white);
+  outline: none;
+}
+
+.input-hint {
+  font-size: 0.8rem;
+  color: var(--gray-medium);
+}
+
+/* =========================
+   FEATURES
+========================= */
+.features-list {
+  background: rgba(224,138,46,0.07);
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.feature-item {
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+/* =========================
+   CONSENT
+========================= */
+.consent-label {
+  font-size: 0.85rem;
+  color: var(--gray-medium);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.submit-btn {
+  font-size: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
   border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 15px;
+  background: var(--gradient-orange);
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
 }
 
-.otp-btn:hover {
-  background: var(--light-accent);
+.verify-btn {
+  background: var(--gradient-primary);
+}
+
+.back-btn {
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  color: var(--gray-medium);
+  cursor: pointer;
 }
 
 /* =========================
-   OTP MODAL
+   OTP
 ========================= */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
+.otp-header h3 {
+  font-size: 1.2rem;
 }
 
-.modal-content {
-  background: var(--white);
-  width: 90%;
-  max-width: 350px;
-  padding: 20px;
-  border-radius: 14px;
+.otp-subtitle {
+  font-size: 0.9rem;
+}
+
+.otp-timer {
+  font-size: 0.85rem;
+  color: var(--primary-orange);
+}
+
+.otp-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.6rem;
+}
+
+.otp-digit {
+  font-size: 1.4rem;
+  font-weight: 700;
   text-align: center;
+  border: 2px solid var(--gray-light);
+  border-radius: 10px;
 }
-
-.otp-inputs {
-  display: flex;
-  justify-content: space-between;
-  margin: 14px 0;
-}
-
-.otp-inputs input {
-  width: 42px;
-  height: 42px;
-  text-align: center;
-  font-size: 18px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
 
 /* =========================
    FOOTER
 ========================= */
 .login-footer {
-  background: var(--secondary-blue);
-  color: var(--white);
-  padding: 18px 10px;
-  font-size: 12px;
+  background: var(--primary-blue);
+  color: #fff;
+  padding: 2rem 1rem 1rem;
 }
 
-.footer-simple {
-  max-width: 380px;
-  margin: auto;
+.footer-section h4 {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  color: var(--light-orange);
+}
+
+.footer-section p,
+.footer-section a {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.footer-bottom {
   text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
-.footer-contact-simple p {
-  margin: 4px 0;
-}
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 1.2rem;
+  }
 
-.footer-links-simple a {
-  color: var(--light-accent);
-  text-decoration: none;
+  .submit-btn {
+    font-size: 0.95rem;
+  }
+
+  .otp-digit {
+    font-size: 1.2rem;
+  }
 }
