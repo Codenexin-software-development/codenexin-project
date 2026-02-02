@@ -1,21 +1,28 @@
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const Membership = require("../models/Membership");
 const Otp = require("../models/Otp");
-const sendSMS = require("../utils/sendSMS");
-const OTP_VALIDITY_MINUTES = Number(process.env.OTP_VALIDITY_MINUTES);
-const OTP_COOLDOWN_SECONDS = Number(process.env.OTP_COOLDOWN_SECONDS);
 
+const generateMembershipNumber = () =>
+  "NPP-" + Math.floor(100000 + Math.random() * 900000);
 
 const generateOTP = () =>
     Math.floor(100000 + Math.random() * 900000).toString();
 
-exports.sendOTP = async (req, res) => {
-    const { phone } = req.body;
+const OTP_VALIDITY_MINUTES = Number(process.env.OTP_VALIDITY_MINUTES) || 10;
+const OTP_COOLDOWN_SECONDS = Number(process.env.OTP_COOLDOWN_SECONDS) || 60;
 
-    if (!phone) {
-        return res.status(400).json({ message: "Phone number required" });
+exports.sendOTP = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: "Email required" });
     }
 
     try {
-        const existingOtp = await Otp.findOne({ phone });
+        const lowerEmail = email.toLowerCase();
+        console.log(`Sending OTP for email: ${email} (lowercased: ${lowerEmail})`);
+        const existingOtp = await Otp.findOne({ email: lowerEmail });
 
         // ⏱ Rate limit
         if (existingOtp) {
@@ -32,10 +39,11 @@ exports.sendOTP = async (req, res) => {
 
             // 🔁 RESEND same OTP if still valid
             console.log(
-                `🔁 Resending OTP for ${phone}: ${existingOtp.otp} (valid for ${OTP_VALIDITY_MINUTES} minutes)`
+                `🔁 Resending OTP for ${email}: ${existingOtp.otp} (valid for ${OTP_VALIDITY_MINUTES} minutes)`
             );
 
-            await sendSMS(phone, existingOtp.otp);
+            // Print OTP to console instead of sending email
+            console.log(`📩 OTP for ${email}: ${existingOtp.otp}`);
 
             return res.status(200).json({
                 message: `OTP resent. It is valid for ${OTP_VALIDITY_MINUTES} minutes`
@@ -45,13 +53,14 @@ exports.sendOTP = async (req, res) => {
         // 🆕 Generate new OTP
         const otp = generateOTP();
 
-        await Otp.create({ phone, otp });
+        await Otp.create({ email: lowerEmail, otp });
 
         console.log(
-            `📩 OTP generated for ${phone}: ${otp} (valid for ${OTP_VALIDITY_MINUTES} minutes)`
+            `📩 OTP generated for ${email}: ${otp} (valid for ${OTP_VALIDITY_MINUTES} minutes)`
         );
 
-        await sendSMS(phone, otp);
+        // Print OTP to console instead of sending email
+        console.log(`📩 OTP for ${email}: ${otp}`);
 
         res.status(200).json({
             message: `OTP sent. It is valid for ${OTP_VALIDITY_MINUTES} minutes`
@@ -62,23 +71,25 @@ exports.sendOTP = async (req, res) => {
     }
 };
 
-// VERIFY OTP
 exports.verifyOTP = async (req, res) => {
-    const { phone, otp } = req.body;
+  const { email, otp } = req.body;
 
-    try {
-        const record = await Otp.findOne({ phone, otp });
-
-        if (!record) {
-            return res.status(400).json({ message: "Invalid or expired OTP" });
-        }
-
-        // OTP verified → delete
-        await Otp.deleteMany({ phone });
-
-        res.status(200).json({ message: "OTP verified successfully" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Verification failed" });
+  try {
+    const otpString = String(otp);
+    const trimmedOtp = otpString.trim();
+    console.log(`Verifying OTP for ${email}: received '${otp}' (${typeof otp}), trimmed '${trimmedOtp}'`);
+    const record = await Otp.findOne({ email: email.toLowerCase(), otp: trimmedOtp });
+    if (!record) {
+      console.log(`No record found for email: ${email.toLowerCase()}, otp: ${trimmedOtp}`);
+      return res.status(400).json({ message: "Invalid or expired OTP" });
     }
+
+    // 🔥 OTP valid → remove all OTPs for email
+    await Otp.deleteMany({ email: email.toLowerCase() });
+
+    res.status(200).json({ message: "OTP verified successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Verification failed" });
+  }
 };
