@@ -78,59 +78,70 @@ export default function AdminOTPPage() {
   // Verify OTP function
   const verifyOtp = async (otpCode = null) => {
     const otpToVerify = otpCode || otp.join("");
-    
+
     console.log("Verifying OTP:", otpToVerify);
-    
+
     if (otpToVerify.length !== 6) {
       setError("Please enter 6-digit OTP");
       return;
     }
-    
+
     setLoading(true);
     setError("");
-    
+
     try {
-      // Simulate API verification
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Demo: Accept any 6-digit number
-      const isValid = /^\d{6}$/.test(otpToVerify);
-      
-      if (!isValid) {
-        setError("Invalid OTP format");
+      const response = await fetch('http://localhost:5000/api/otp/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: adminEmail,
+          otp: otpToVerify
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // ✅ OTP verified successfully
+        console.log("✅ OTP verified:", data.message);
+
+        // Set all possible authentication keys
+        console.log("Setting admin authentication...");
+
+        localStorage.setItem("role", "ADMIN");
+        localStorage.setItem("admin_role", "ADMIN");
+        localStorage.setItem("twoFactor", "true");
+        localStorage.setItem("admin_twoFactor", "true");
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("admin_authenticated", "true");
+        localStorage.setItem("adminEmail", adminEmail || "admin@npp.com");
+
+        // Set expiry (24 hours)
+        const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+        localStorage.setItem("tokenExpiry", expiryTime.toString());
+
+        console.log("✅ Authentication set successfully!");
+
+        // Clear session storage
+        sessionStorage.removeItem("admin_login_step");
+        sessionStorage.removeItem("admin_email");
+        sessionStorage.removeItem("2fa-step");
+        sessionStorage.removeItem("otpTarget");
+
+        // Navigate to admin dashboard
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        // ❌ OTP verification failed
+        console.log("❌ OTP verification failed:", data.message);
+        setError(data.message || "Invalid or expired OTP");
         setLoading(false);
-        return;
       }
-      
-      // ✅ Set all possible authentication keys
-      console.log("Setting admin authentication...");
-      
-      localStorage.setItem("role", "ADMIN");
-      localStorage.setItem("admin_role", "ADMIN");
-      localStorage.setItem("twoFactor", "true");
-      localStorage.setItem("admin_twoFactor", "true");
-      localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("admin_authenticated", "true");
-      localStorage.setItem("adminEmail", adminEmail || "admin@npp.com");
-      
-      // Set expiry (24 hours)
-      const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
-      localStorage.setItem("tokenExpiry", expiryTime.toString());
-      
-      console.log("✅ Authentication set successfully!");
-      
-      // Clear session storage
-      sessionStorage.removeItem("admin_login_step");
-      sessionStorage.removeItem("admin_email");
-      sessionStorage.removeItem("2fa-step");
-      sessionStorage.removeItem("otpTarget");
-      
-      // Navigate to admin dashboard
-      navigate("/admin/dashboard", { replace: true });
-      
+
     } catch (err) {
       console.error("OTP verification error:", err);
-      setError("Verification failed. Please try again.");
+      setError("Network error. Please check your connection and try again.");
       setLoading(false);
     }
   };
