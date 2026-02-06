@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/api";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -26,44 +27,14 @@ function ProfilePage() {
   const set = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  // Check authentication on mount and load saved profile data
+  // Check authentication on mount
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("nyaypaksh_authenticated");
     const userData = localStorage.getItem("nyaypaksh_user");
-    
+
     if (!isAuthenticated || isAuthenticated !== "true" || !userData) {
       navigate("/login", { replace: true });
       return;
-    }
-
-    // Load saved profile data if exists
-    const savedProfile = localStorage.getItem("nyaypaksh_profile");
-    if (savedProfile) {
-      try {
-        const profileData = JSON.parse(savedProfile);
-        
-        // Update form with saved data
-        if (profileData.form) {
-          setForm(profileData.form);
-        }
-        
-        // Update gender
-        if (profileData.gender) {
-          setGender(profileData.gender);
-        }
-        
-        // Update profile image
-        if (profileData.profileImage) {
-          setProfileImage(profileData.profileImage);
-        }
-        
-        // Update consent
-        if (profileData.agreedToUpdates !== undefined) {
-          setAgreedToUpdates(profileData.agreedToUpdates);
-        }
-      } catch (error) {
-        console.error("Error loading saved profile:", error);
-      }
     }
   }, [navigate]);
 
@@ -96,7 +67,7 @@ function ProfilePage() {
   };
 
   // ─── Save Profile ───
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate required fields
     const missingFields = validateForm();
     if (missingFields.length > 0) {
@@ -105,55 +76,84 @@ function ProfilePage() {
     }
 
     setIsSaving(true);
-    
-    // Save profile data to localStorage
-    const profileData = {
-      form,
-      gender,
-      profileImage,
-      agreedToUpdates,
-      lastUpdated: new Date().toISOString(),
-      isComplete: true
-    };
-    
-    localStorage.setItem("nyaypaksh_profile", JSON.stringify(profileData));
-    
-    // Mark profile as complete
-    localStorage.setItem("nyaypaksh_profile_complete", "true");
-    
-    // Update user data with profile info
-    const userDataStr = localStorage.getItem("nyaypaksh_user");
-    if (userDataStr) {
-      try {
-        const userData = JSON.parse(userDataStr);
-        const updatedUserData = {
-          ...userData,
-          fullName: form.name,
-          email: form.email,
-          phone: form.mobile,
-          gender: gender,
-          profileComplete: true,
-          profileUpdated: new Date().toISOString()
+
+    try {
+      // Prepare profile data for API
+      const profileData = {
+        title: form.title,
+        name: form.name,
+        email: form.email,
+        dob: form.dob,
+        address: form.address,
+        pincode: form.pincode,
+        state: form.state,
+        district: form.district,
+        ac: form.ac,
+        gender: gender,
+        profileImage: profileImage,
+        agreedToUpdates: agreedToUpdates
+      };
+
+      // Send to backend API first
+      const response = await api.put('/api/auth/profile', profileData);
+
+      if (response.status === 200) {
+        // Save profile data to localStorage for offline access only after API success
+        const localProfileData = {
+          form,
+          gender,
+          profileImage,
+          agreedToUpdates,
+          lastUpdated: new Date().toISOString(),
+          isComplete: true
         };
-        localStorage.setItem("nyaypaksh_user", JSON.stringify(updatedUserData));
-      } catch (error) {
-        console.error("Error updating user data:", error);
+
+        localStorage.setItem("nyaypaksh_profile", JSON.stringify(localProfileData));
+
+        // Mark profile as complete
+        localStorage.setItem("nyaypaksh_profile_complete", "true");
+
+        // Update user data with profile info
+        const userDataStr = localStorage.getItem("nyaypaksh_user");
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            const updatedUserData = {
+              ...userData,
+              fullName: form.name,
+              email: form.email,
+              phone: form.mobile,
+              gender: gender,
+              profileComplete: true,
+              profileUpdated: new Date().toISOString()
+            };
+            localStorage.setItem("nyaypaksh_user", JSON.stringify(updatedUserData));
+          } catch (error) {
+            console.error("Error updating user data:", error);
+          }
+        }
+
+        // Show success message
+        setTimeout(() => {
+          setIsSaving(false);
+          alert("✓ Profile saved successfully!");
+
+          // Set flag for dashboard to show success banner
+          sessionStorage.setItem("profile_just_saved", "true");
+
+          // Redirect to dashboard after 1 second
+          setTimeout(() => {
+            navigate("/dashboard", { replace: true });
+          }, 1000);
+        }, 1500);
+      } else {
+        throw new Error(`API returned status ${response.status}`);
       }
-    }
-    
-    // Show success message
-    setTimeout(() => {
+    } catch (error) {
+      console.error('Profile save error:', error);
       setIsSaving(false);
-      alert("✓ Profile saved successfully!");
-      
-      // Set flag for dashboard to show success banner
-      sessionStorage.setItem("profile_just_saved", "true");
-      
-      // Redirect to dashboard after 1 second
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 1000);
-    }, 1500);
+      alert("❌ Failed to save profile. Please try again.");
+    }
   };
 
   // ─── Default avatar SVG ───

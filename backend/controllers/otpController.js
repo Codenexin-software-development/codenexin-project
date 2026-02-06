@@ -93,3 +93,68 @@ exports.verifyOTP = async (req, res) => {
     res.status(500).json({ message: "Verification failed" });
   }
 };
+
+exports.sendAdminOTP = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email required" });
+  }
+
+  // Check if email is admin email (you can have a list or check against DB)
+  const adminEmails = ['admin@npp.com', 'admin@example.com']; // Add your admin emails
+  if (!adminEmails.includes(email.toLowerCase())) {
+    return res.status(403).json({ message: "Unauthorized admin email" });
+  }
+
+  try {
+    const lowerEmail = email.toLowerCase();
+    console.log(`Sending admin OTP for email: ${email}`);
+    const existingOtp = await Otp.findOne({ email: lowerEmail });
+
+    // ⏱ Rate limit
+    if (existingOtp) {
+      const secondsSinceLast =
+        (Date.now() - existingOtp.createdAt.getTime()) / 1000;
+
+      if (secondsSinceLast < OTP_COOLDOWN_SECONDS) {
+        return res.status(429).json({
+          message: `Please wait ${Math.ceil(
+            OTP_COOLDOWN_SECONDS - secondsSinceLast
+          )} seconds before requesting OTP again`
+        });
+      }
+
+      // 🔁 RESEND same OTP if still valid
+      console.log(
+        `🔁 Resending admin OTP for ${email}: ${existingOtp.otp}`
+      );
+
+      // Print OTP to console instead of sending email
+      console.log(`📩 Admin OTP for ${email}: ${existingOtp.otp}`);
+
+      return res.status(200).json({
+        message: `Admin OTP resent. It is valid for ${OTP_VALIDITY_MINUTES} minutes`
+      });
+    }
+
+    // 🆕 Generate new OTP
+    const otp = generateOTP();
+
+    await Otp.create({ email: lowerEmail, otp });
+
+    console.log(
+      `📩 Admin OTP generated for ${email}: ${otp}`
+    );
+
+    // Print OTP to console instead of sending email
+    console.log(`📩 Admin OTP for ${email}: ${otp}`);
+
+    res.status(200).json({
+      message: `Admin OTP sent. It is valid for ${OTP_VALIDITY_MINUTES} minutes`
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to send admin OTP" });
+  }
+};

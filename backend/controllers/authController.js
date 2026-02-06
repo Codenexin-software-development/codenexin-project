@@ -1,10 +1,11 @@
 const User = require('../models/User');
 const Otp = require('../models/Otp');
+const jwt = require('jsonwebtoken');
 
 // Register user after OTP verification
 const register = async (req, res) => {
     try {
-        const { mobile, email, fullName } = req.body;
+        const { mobile, email, name } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ mobile });
@@ -19,11 +20,14 @@ const register = async (req, res) => {
         const user = new User({
             mobile,
             email,
-            fullName,
+            name,
             isActive: true
         });
 
         await user.save();
+
+        // Generate JWT token
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '7d' });
 
         // Generate membership number (you can customize this logic)
         const membershipNumber = `NPP-M${Date.now()}`;
@@ -31,11 +35,12 @@ const register = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
+            token,
             user: {
                 id: user._id,
                 mobile: user.mobile,
                 email,
-                fullName,
+                name,
                 membershipNumber,
                 isRegistered: true,
                 registrationDate: user.createdAt

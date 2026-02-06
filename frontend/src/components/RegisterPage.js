@@ -176,9 +176,13 @@ const RegisterPage = ({ onRegister }) => {
       const response = await api.post('/api/auth/register', {
         mobile: formData.phone,
         email: formData.email,
-        fullName: formData.fullName
+        name: formData.fullName
       });
       if (response.status === 201) {
+        // Store the token
+        if (response.data.token) {
+          localStorage.setItem('nyaypaksh_token', response.data.token);
+        }
         return response.data.user;
       }
     } catch (error) {

@@ -236,6 +236,10 @@ const LoginPage = ({ onLogin }) => {
     try {
       const response = await api.post('/api/auth/login', { mobile: phone });
       if (response.status === 200) {
+        // Store the token
+        if (response.data.token) {
+          localStorage.setItem('nyaypaksh_token', response.data.token);
+        }
         return response.data.user;
       }
     } catch (error) {
