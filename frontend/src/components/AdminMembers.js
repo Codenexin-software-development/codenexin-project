@@ -37,14 +37,14 @@ export default function Members() {
     logActionFilter === "ALL" || log.action === logActionFilter;
 
   const memberMatch =
-    log.member.toLowerCase().includes(logMemberFilter.toLowerCase());
+    log.member && log.member.toLowerCase().includes(logMemberFilter.toLowerCase());
 
   return actionMatch && memberMatch;
 });
 
   const filteredMembers = members.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase()) ||
-    m.mobile.includes(search) ||
+    (m.name && m.name.toLowerCase().includes(search.toLowerCase())) ||
+    (m.mobile && m.mobile.includes(search)) ||
     (m.email && m.email.toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -305,8 +305,8 @@ export default function Members() {
                     <td>{m.mobile}</td>
                     <td>{m.email || "-"}</td>
                     <td>
-                      <span className={`badge ${m.status.toLowerCase()}`}>
-                        {m.status}
+                      <span className={`badge ${m.status ? m.status.toLowerCase() : 'unknown'}`}>
+                        {m.status || 'Unknown'}
                       </span>
                     </td>
                     <td>{m.validTill ? new Date(m.validTill).toLocaleDateString() : "-"}</td>
